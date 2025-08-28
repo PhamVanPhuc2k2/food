@@ -3,10 +3,16 @@ const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
 const checkoutController = require("../controllers/checkoutController");
 
-router.post(
-  "/create-checkout",
+router.post("/", authMiddleware, checkoutController.createCheckoutController);
+router.put(
+  "/:id/pay",
   authMiddleware,
-  checkoutController.createCheckoutController
+  checkoutController.updateCheckoutController
+);
+router.post(
+  "/:id/finalize",
+  authMiddleware,
+  checkoutController.completeCheckoutController
 );
 
 module.exports = router;
