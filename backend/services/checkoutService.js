@@ -35,6 +35,7 @@ const checkoutService = {
   },
   updateCheckoutService: async (checkoutId, data) => {
     try {
+      const { paymentDetails, paymentStatus } = data;
       const checkout = await Checkout.findById(checkoutId);
       if (!checkout) {
         return {
@@ -43,9 +44,9 @@ const checkoutService = {
           code: 404,
         };
       }
-      if (paymentStatus === "paid") {
+      if (paymentStatus && paymentStatus.toLowerCase() === "paid") {
         checkout.isPaid = true;
-        checkout.paymentStatus = paymentStatus;
+        checkout.paymentStatus = "paid";
         checkout.paymentDetails = paymentDetails;
         checkout.paidAt = Date.now();
 
@@ -54,6 +55,7 @@ const checkoutService = {
           status: "OK",
           message: "Cập nhật thanh toán thành công!",
           code: 200,
+          data: checkout,
         };
       } else {
         return {
@@ -68,53 +70,41 @@ const checkoutService = {
   },
   completeCheckoutService: async (checkoutId) => {
     try {
-      const checkout = await Checkout.findById(checkoutId);
+      const checkout = await Checkout.findOneAndUpdate(
+        { _id: checkoutId, isPaid: true, isFinalized: { $ne: true } }, // chỉ chọn chưa finalize
+        { $set: { isFinalized: true, finalizedAt: Date.now() } }, // đánh dấu luôn
+        { new: true }
+      );
+
       if (!checkout) {
         return {
           status: "ERR",
-          message: "không tìm thấy thanh toán!",
-          code: 404,
+          message: "Thanh toán đã hoàn tất hoặc không hợp lệ!",
+          code: 409,
         };
       }
-      if (checkout.isPaid && !checkout.isFinalized) {
-        const finalOrder = await Order.create({
-          user: checkout.user,
-          orderItems: checkout.checkoutItems,
-          shippingAddress: checkout.shippingAddress,
-          paymentMethod: checkout.paymentMethod,
-          totalPrice: checkout.totalPrice,
-          isPaid: true,
-          paidAt: checkout.paidAt,
-          isDelivered: false,
-          paymentStatus: "paid",
-          paymentDetails: checkout.paymentDetails,
-        });
-        checkout.isFinalized = true;
-        checkout.finalizedAt = Date.now();
-        await checkout.save();
 
-        await Cart.findOneAndDelete({ user: checkout.user });
-        return {
-          status: "OK",
-          message: "Hoàn thành thanh toán thành công!",
-          code: 201,
-          data: {
-            finalOrder,
-          },
-        };
-      } else if (checkout.isFinalized) {
-        return {
-          status: "ERR",
-          message: "Thanh toán đã hoàn tất!",
-          code: 400,
-        };
-      } else {
-        return {
-          status: "ERR",
-          message: "Thanh toán thât bại!",
-          code: 400,
-        };
-      }
+      const finalOrder = await Order.create({
+        user: checkout.user,
+        orderItems: checkout.checkoutItems,
+        shippingAddress: checkout.shippingAddress,
+        paymentMethod: checkout.paymentMethod,
+        totalPrice: checkout.totalPrice,
+        isPaid: true,
+        paidAt: checkout.paidAt,
+        isDelivered: false,
+        paymentStatus: "paid",
+        paymentDetails: checkout.paymentDetails,
+      });
+
+      await Cart.findOneAndDelete({ user: checkout.user });
+
+      return {
+        status: "OK",
+        message: "Hoàn thành thanh toán thành công!",
+        code: 201,
+        data: { finalOrder },
+      };
     } catch (err) {
       throw err;
     }

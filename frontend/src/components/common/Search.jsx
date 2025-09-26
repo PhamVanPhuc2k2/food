@@ -1,10 +1,18 @@
 import React, { useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import { IoCloseOutline } from "react-icons/io5";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {
+  fetchProductsByFilters,
+  setFilters,
+} from "../../redux/slices/productSlice";
 
 const Search = () => {
   const [searchValue, setSearchValue] = useState("");
   const [show, setShow] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleShowSearch = () => {
     setShow(!show);
@@ -12,7 +20,9 @@ const Search = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log(searchValue);
+    dispatch(setFilters({ search: searchValue }));
+    dispatch(fetchProductsByFilters({ search: { searchValue } }));
+    navigate(`products/all?search=${searchValue}`);
     setShow(false);
   };
 

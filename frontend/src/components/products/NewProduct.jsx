@@ -1,120 +1,26 @@
+import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const NewProduct = () => {
-  const newProducts = [
-    {
-      _id: "1",
-      name: "Rau má",
-      price: 120,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=1",
-          altText: "rau-ma",
-        },
-      ],
-    },
-    {
-      _id: "2",
-      name: "Rau bí",
-      price: 200,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=2",
-          altText: "rau-ma",
-        },
-      ],
-    },
-    {
-      _id: "3",
-      name: "Rau mùng tơi",
-      price: 300,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=3",
-          altText: "rau-ma",
-        },
-      ],
-    },
-    {
-      _id: "4",
-      name: "Rau cải",
-      price: 400,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=4",
-          altText: "rau-ma",
-        },
-      ],
-    },
-    {
-      _id: "5",
-      name: "Thịt bò",
-      price: 500,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=5",
-          altText: "rau-ma",
-        },
-      ],
-    },
-    {
-      _id: "6",
-      name: "Thị lợn",
-      price: 600,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=6",
-          altText: "rau-ma",
-        },
-      ],
-    },
-    {
-      _id: "7",
-      name: "Thịt chó",
-      price: 700,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=7",
-          altText: "rau-ma",
-        },
-      ],
-    },
-    {
-      _id: "8",
-      name: "Tôm",
-      price: 800,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=8",
-          altText: "rau-ma",
-        },
-      ],
-    },
-    {
-      _id: "9",
-      name: "Cá tầm",
-      price: 900,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=9",
-          altText: "rau-ma",
-        },
-      ],
-    },
-    {
-      _id: "10",
-      name: "Cá hồi",
-      price: 520,
-      image: [
-        {
-          url: "https://picsum.photos/200?random=10",
-          altText: "rau-ma",
-        },
-      ],
-    },
-  ];
+  const [newArrivals, setNewArrivals] = useState([]);
+
+  useEffect(() => {
+    const fetchNewArrivals = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/product/new-arrival`
+        );
+        console.log(response.data);
+        setNewArrivals(response.data.newProducts);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchNewArrivals();
+  }, []);
+
   const scrollRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -180,7 +86,7 @@ const NewProduct = () => {
         container.removeEventListener("scroll", updateScrollButtons);
       }
     };
-  }, []);
+  }, [newArrivals]);
 
   return (
     <section>
@@ -217,7 +123,7 @@ const NewProduct = () => {
         ref={scrollRef}
         className="w-[90%] mx-auto overflow-x-scroll flex space-x-6 relative"
       >
-        {newProducts.map((product) => {
+        {newArrivals.map((product) => {
           return (
             <div
               className="min-w-[100%] sm:min-w-[40%] lg:min-w-[30%] relative"
@@ -225,13 +131,15 @@ const NewProduct = () => {
             >
               <img
                 className="w-full aspect-square  object-cover rounded-lg"
-                src={product.image[0]?.url}
-                alt={product.image[0]?.altText || product.name}
+                src={product.images[0]?.url}
+                alt={product.images[0]?.altText || product.name}
               />
               <div className="absolute bottom-0 left-0 right-0 backdrop:blur-md text-white p-4 rounded-b-lg">
                 <Link to={`/product/${product._id}`} className="block">
-                  <h4 className="font-medium">{product.name}</h4>
-                  <p className="mt-1">{product.price} VNĐ</p>
+                  <h4 className="font-medium text-green-500">{product.name}</h4>
+                  <p className="mt-1 text-orange-500">
+                    {product.price.toLocaleString("vi-VN")} VNĐ
+                  </p>
                 </Link>
               </div>
             </div>

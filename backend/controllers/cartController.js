@@ -19,6 +19,7 @@ const cartController = {
   },
   deleteCartController: async (req, res, next) => {
     try {
+      console.log("DELETE /api/cart body:", req.body);
       const response = await cartService.deleteCartService(req.body);
       return res.status(response.code).json(response);
     } catch (err) {

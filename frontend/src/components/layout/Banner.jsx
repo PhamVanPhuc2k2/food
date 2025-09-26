@@ -1,6 +1,5 @@
 import React from "react";
 import banner from "../../assets/banner.png";
-import { Link } from "react-router-dom";
 
 const Banner = () => {
   return (
@@ -15,12 +14,6 @@ const Banner = () => {
           <h1 className="text-4xl md:text-9xl font-bold tracking-tighter uppercase mb-4">
             food
           </h1>
-          <Link
-            to="/products/all"
-            className="bg-white text-black px-6 py-2 rounded-sm text-lg"
-          >
-            Shop Now
-          </Link>
         </div>
       </div>
     </section>

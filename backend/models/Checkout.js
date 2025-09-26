@@ -13,8 +13,8 @@ const checkoutItemSchema = new mongoose.Schema(
       required: true,
     },
     image: {
-      type: String,
-      required: true,
+      url: { type: String, required: true },
+      altText: { type: String },
     },
     price: {
       type: Number,
@@ -38,11 +38,11 @@ const checkoutSchema = new mongoose.Schema(
       required: true,
     },
     checkoutItems: [checkoutItemSchema],
-    skippingAddress: {
+    shippingAddress: {
       address: { type: String, required: true },
       city: { type: String, required: true },
-      postalCode: { type: String, required: true },
-      country: { type: String, required: true },
+      postalCode: { type: String },
+      country: { type: String },
     },
     paymentMethod: {
       type: String,

@@ -17,9 +17,9 @@ const SortOptions = () => {
         onChange={handleSortChange}
         value={searchParams.get("sortBy") || ""}
       >
-        <option value="">Default</option>
-        <option value="priceAsc">Price: Low to Hight</option>
-        <option value="priceDesc">Price: Hight to Low</option>
+        <option value="">Mặc định</option>
+        <option value="priceAsc">Giá: từ thấp đến cao</option>
+        <option value="priceDesc">Giá: từ cao đến thấp</option>
         <option value=""></option>
       </select>
     </div>

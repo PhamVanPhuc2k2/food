@@ -17,10 +17,7 @@ const SelectCategory = () => {
           />
           <div className="absolute bottom-2 left-2 bg-white p-2 rounded">
             <h2 className="text-xl font-bold text-gray-900 mb-1">Rau củ quả</h2>
-            <Link
-              to="/product/all?category=rau-cu-qua"
-              className="text-gray-700 underline"
-            >
+            <Link to="/products/rau-cu-qua" className="text-gray-700 underline">
               Shop Now
             </Link>
           </div>
@@ -36,7 +33,7 @@ const SelectCategory = () => {
               Đồ tươi sống
             </h2>
             <Link
-              to="/product/all?category=do-tuoi-song"
+              to="/products/do-tuoi-song"
               className="text-gray-700 underline"
             >
               Shop Now
@@ -51,10 +48,7 @@ const SelectCategory = () => {
           />
           <div className="absolute bottom-2 left-2 bg-white p-2 rounded">
             <h2 className="text-xl font-bold text-gray-900 mb-1">Gia vị</h2>
-            <Link
-              to="/product/all?category=gia-vi"
-              className="text-gray-700 underline"
-            >
+            <Link to="/products/gia-vi" className="text-gray-700 underline">
               Shop Now
             </Link>
           </div>
@@ -67,10 +61,7 @@ const SelectCategory = () => {
           />
           <div className="absolute bottom-2 left-2 bg-white p-2 rounded">
             <h2 className="text-xl font-bold text-gray-900 mb-1">Đồ khô</h2>
-            <Link
-              to="/product/all?category=do-kho"
-              className="text-gray-700 underline"
-            >
+            <Link to="/products/do-kho" className="text-gray-700 underline">
               Shop Now
             </Link>
           </div>

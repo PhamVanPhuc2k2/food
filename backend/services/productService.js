@@ -88,22 +88,18 @@ const productService = {
   getAllProductService: async (data) => {
     try {
       const {
-        collection,
         minPrice,
         maxPrice,
         sortBy,
         search,
         category,
         brand,
-        limit = 10,
+        limit = 8,
         page = 1,
       } = data;
       let filter = {};
       let sort = {};
-      if (collection && collection.toLocaleLowerCase() !== "all") {
-        filter.collection = collection;
-      }
-      if (category && category.toLocaleLowerCase() !== "all") {
+      if (category) {
         filter.category = category;
       }
       if (minPrice || maxPrice) {
@@ -148,9 +144,7 @@ const productService = {
         status: "OK",
         message: "Lấy danh sách sản phẩm thành công!",
         code: 200,
-        data: {
-          products,
-        },
+        data: products,
         pagination: {
           page,
           limit,
@@ -178,9 +172,7 @@ const productService = {
         status: "OK",
         message: "Lấy thông tin sản phẩm thành công!",
         code: 200,
-        data: {
-          product,
-        },
+        data: product,
       };
     } catch (err) {
       throw err;
@@ -229,9 +221,7 @@ const productService = {
         status: "OK",
         message: "Lấy thông tin sản phẩm thành công!",
         code: 200,
-        data: {
-          bestSeller,
-        },
+        bestSeller,
       };
     } catch (err) {
       throw err;
@@ -251,9 +241,7 @@ const productService = {
         status: "OK",
         message: "Lấy danh sách sản phẩm mới thành công!",
         code: 200,
-        data: {
-          newProducts,
-        },
+        newProducts,
       };
     } catch (err) {
       throw err;

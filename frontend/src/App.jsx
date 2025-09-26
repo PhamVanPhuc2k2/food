@@ -17,6 +17,9 @@ import UserManagement from "./components/admin/UserManagement";
 import ProductManagement from "./components/admin/ProductManagement";
 import EditProduct from "./components/admin/EditProduct";
 import OrderManagement from "./components/admin/OrderManagement";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import AdminProductCreate from "./components/admin/AdminProductCreate";
 
 function App() {
   return (
@@ -28,19 +31,28 @@ function App() {
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="products/:collection" element={<Product />} />
+          <Route path="products/:category" element={<Product />} />
           <Route path="product/:id" element={<ProductDetail />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="order-confirmation" element={<OrderConfirmation />} />
           <Route path="order/:id" element={<OrderDetail />} />
           <Route path="my-orders" element={<MyOrder />} />
+          <Route path="payment-success" element={<PaymentSuccess />} />
         </Route>
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<AdminHome />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="products" element={<ProductManagement />} />
           <Route path="products/:id/edit" element={<EditProduct />} />
           <Route path="orders" element={<OrderManagement />} />
+          <Route path="products/create" element={<AdminProductCreate />} />
         </Route>
       </Routes>
     </BrowserRouter>

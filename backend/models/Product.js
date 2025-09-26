@@ -37,7 +37,6 @@ const productSchema = new mongoose.Schema(
     },
     collections: {
       type: String,
-      required: true,
     },
     unit: {
       type: String,

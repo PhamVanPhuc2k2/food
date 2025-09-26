@@ -1,39 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PayPalButton from "./PayPalButton";
+import MoMoButton from "./MoMoButton";
+import { useDispatch, useSelector } from "react-redux";
+import { createCheckout } from "../../redux/slices/checkoutSlice";
 
-const cart = {
-  products: [
-    {
-      productId: 1,
-      name: "Rau má",
-      unit: "mớ",
-      quantity: 1,
-      price: 15,
-      image: "https://picsum.photos/200?random=1",
-    },
-    {
-      productId: 2,
-      name: "Thịt bò",
-      unit: "kg",
-      quantity: 2,
-      price: 25,
-      image: "https://picsum.photos/200?random=2",
-    },
-    {
-      productId: 3,
-      name: "Nước mắm",
-      unit: "chai",
-      quantity: 3,
-      price: 30,
-      image: "https://picsum.photos/200?random=3",
-    },
-  ],
-  totalPrice: 95,
-};
 const Checkout = () => {
   const navigate = useNavigate();
-  const [checkoutId, setCheckId] = useState(null);
+  const dispatch = useDispatch();
+  const { cart, loading, error } = useSelector((state) => state.cart);
+  const { user } = useSelector((state) => state.auth);
+
+  const [checkoutId, setCheckoutId] = useState(null);
   const [shippingAddress, setShippingAddress] = useState({
     firstName: "",
     lastName: "",
@@ -43,16 +20,36 @@ const Checkout = () => {
     phone: "",
   });
 
-  const handleCreateCheckout = (e) => {
+  useEffect(() => {
+    if (!cart || !cart.products || cart.products.length === 0) {
+      navigate("/");
+    }
+  }, [cart, navigate]);
+
+  const handleCreateCheckout = async (e) => {
     e.preventDefault();
-    setCheckId(123);
+    if (checkoutId) return;
+    if (cart && cart.products.length > 0) {
+      const res = await dispatch(
+        createCheckout({
+          checkoutItems: cart.products,
+          shippingAddress,
+          paymentMethod: "MoMo",
+          totalPrice: cart.totalPrice,
+        })
+      );
+      if (res.payload && res.payload._id) {
+        setCheckoutId(res.payload._id);
+        localStorage.setItem("checkoutId", res.payload._id);
+      }
+    }
   };
 
-  const handlePaymentSuccess = (details) => {
-    console.log("Thanh toán thành công!", details);
-    navigate("/order-confirmation");
-  };
-
+  if (loading) return <p>Loading cart ...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!cart || !cart.products || cart.products.length === 0) {
+    return <p>Giỏ hàng của bạn không có sản phẩm nào!</p>;
+  }
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto py-10 px-6 tracking-tighter">
       <div className="bg-white rounded-lg p-6">
@@ -63,7 +60,7 @@ const Checkout = () => {
             <label className="block text-gray-700">Email</label>
             <input
               type="email"
-              value="test@gmail.com"
+              value={user ? user.email : ""}
               className="w-full p-2 border rounded"
               disabled
             />
@@ -151,16 +148,20 @@ const Checkout = () => {
               <button
                 type="submit"
                 className="w-full bg-black text-white py-3 rounded"
+                disabled={loading || checkoutId !== null}
               >
                 Continue to Payment
               </button>
             ) : (
               <div className="">
-                <h3 className="text-lg mb-4">Pay with Paypal</h3>
-                <PayPalButton
-                  amount={100}
-                  onSuccess={handlePaymentSuccess}
-                  onError={(error) => alert("Thanh toán thất bại!")}
+                <h3 className="text-lg mb-4">Pay with MoMo</h3>
+                <MoMoButton
+                  amount={cart.totalPrice}
+                  checkoutId={checkoutId}
+                  onError={(error) => {
+                    console.error(error);
+                    alert("Thanh toán thất bại!");
+                  }}
                 />
               </div>
             )}

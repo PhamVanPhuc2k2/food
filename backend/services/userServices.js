@@ -30,7 +30,7 @@ const userServices = {
         status: "OK",
         message: "Đăng ký thành công!",
         code: 201,
-        data: {
+        user: {
           id: newUser._id,
           name: newUser.name,
           email: newUser.email,

@@ -21,6 +21,7 @@ router.post(
   validateMiddleware(loginSchema),
   userControllers.loginController
 );
+router.post("/logout", userControllers.logoutController);
 router.get(
   "/get-user/:id",
   authMiddleware,
@@ -45,5 +46,6 @@ router.delete(
   checkAdminMiddleware,
   userControllers.deleteUserController
 );
+router.post("/refresh-token", userControllers.refreshTokenController);
 
 module.exports = router;

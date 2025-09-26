@@ -35,6 +35,7 @@ const cartService = {
             image: product.images[0],
             price: product.price,
             quantity,
+            unit: product.unit,
           });
         }
         cart.totalPrice = cart.products.reduce(
@@ -61,6 +62,7 @@ const cartService = {
               image: product.images[0].url,
               price: product.price,
               quantity,
+              unit: product.unit,
             },
           ],
           totalPrice: product.price * quantity,
@@ -90,11 +92,11 @@ const cartService = {
         };
       }
       const productIndex = cart.products.findIndex(
-        (p) => p.productId.toString() === productId
+        (p) => p.productId.toString() === productId.toString()
       );
       if (productIndex > -1) {
         if (quantity > 0) {
-          cart.products[productIndex].quantity += quantity;
+          cart.products[productIndex].quantity = quantity;
         } else {
           cart.products.splice(productIndex, 1);
         }
@@ -133,7 +135,7 @@ const cartService = {
         };
       }
       const productIndex = cart.products.findIndex(
-        (p) => p.productId.toString() === productId
+        (p) => p.productId.toString() === productId.toString()
       );
       if (productIndex > -1) {
         cart.products.splice(productIndex, 1);
@@ -143,7 +145,7 @@ const cartService = {
         );
         await cart.save();
         return {
-          status: "ERR",
+          status: "OK",
           message: "Xóa sản phẩm khỏi giỏ hàng thành công!",
           code: 200,
         };
@@ -155,7 +157,7 @@ const cartService = {
         };
       }
     } catch (err) {
-      next(err);
+      throw err;
     }
   },
   getCartService: async (data) => {
@@ -168,7 +170,7 @@ const cartService = {
           message: "Lấy thông tin giỏ hàng thành công!",
           code: 200,
           data: {
-            cart,
+            cart: cart,
           },
         };
       } else {
@@ -187,7 +189,7 @@ const cartService = {
       const guestCart = await Cart.findOne({
         guestId,
       });
-      const userCart = await Cart.findOne({ _id: userId });
+      const userCart = await Cart.findOne({ user: userId });
       if (guestCart) {
         if (guestCart.products.length === 0) {
           return {

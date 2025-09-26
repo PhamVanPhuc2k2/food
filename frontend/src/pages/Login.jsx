@@ -1,13 +1,40 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { loginUser } from "../redux/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCart, mergeCart } from "../redux/slices/cartSlice";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, guestId } = useSelector((state) => state.auth);
+  const { cart } = useSelector((state) => state.cart);
+
+  const redirect = new URLSearchParams(location.search).get("redirect") || "/";
+  const isCheckoutRedirect = redirect.includes("checkout");
+
+  useEffect(() => {
+    if (user) {
+      if (guestId && cart?.products?.length > 0) {
+        dispatch(mergeCart({ guestId, user })).then(() => {
+          // ✅ Load lại giỏ hàng của user sau khi merge
+          dispatch(fetchCart({ userId: user._id }));
+          navigate(isCheckoutRedirect ? "/checkout" : "/");
+        });
+      } else {
+        // ✅ Nếu không có cart guest thì load trực tiếp
+        dispatch(fetchCart({ userId: user._id }));
+        navigate(isCheckoutRedirect ? "/checkout" : "/");
+      }
+    }
+  }, [user, guestId, cart, dispatch, navigate, isCheckoutRedirect]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(email, password);
+    dispatch(loginUser({ email, password }));
   };
 
   return (
@@ -48,7 +75,10 @@ const Login = () => {
         </button>
         <p className="mt-6 text-center text-sm">
           Chưa có tài khoản?{" "}
-          <Link to="/register" className="text-blue-500">
+          <Link
+            to={`/register?redirect=${encodeURIComponent(redirect)}`}
+            className="text-blue-500"
+          >
             Đăng ký
           </Link>
         </p>

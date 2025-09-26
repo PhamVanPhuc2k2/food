@@ -1,44 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { fetchUserOrders } from "../redux/slices/orderSlice";
 
 const MyOrder = () => {
-  const [orders, setOrders] = useState([]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { orders, loading, error } = useSelector((state) => state.order);
+
   useEffect(() => {
-    const mockOrders = [
-      {
-        _id: "12345",
-        createdAt: new Date(),
-        shippingAddress: { city: "Hai Phong", country: "Vinh Hoa" },
-        orderItems: [
-          {
-            name: "Product 1",
-            image: "https://picsum.photos/200?random=1",
-          },
-        ],
-        totalPrice: 100,
-        isPaid: true,
-      },
-      {
-        _id: "23456",
-        createdAt: new Date(),
-        shippingAddress: { city: "Hai Phong", country: "Vinh Hoa" },
-        orderItems: [
-          {
-            name: "Product 2",
-            image: "https://picsum.photos/200?random=2",
-          },
-        ],
-        totalPrice: 100,
-        isPaid: true,
-      },
-    ];
-    setOrders(mockOrders);
-  }, []);
+    dispatch(fetchUserOrders());
+  }, [dispatch]);
 
   const handleRowCLick = (orderId) => {
     navigate(`/order/${orderId}`);
   };
+
+  if (loading) return <p>Loading ...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
@@ -76,7 +55,7 @@ const MyOrder = () => {
                       #{order._id}
                     </td>
                     <td className="py-2 px-2 sm:py-4 sm:px-4">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Date(order.createdAt).toLocaleDateString()}{" "}
                       {new Date(order.createdAt).toLocaleTimeString()}
                     </td>
                     <td className="py-2 px-2 sm:py-4 sm:px-4">

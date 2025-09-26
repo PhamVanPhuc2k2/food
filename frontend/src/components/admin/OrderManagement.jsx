@@ -1,20 +1,31 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchAllOrders,
+  updateOrderStatus,
+} from "../../redux/slices/adminOrderSlice";
+import { useNavigate } from "react-router-dom";
 
 const OrderManagement = () => {
-  const orders = [
-    {
-      _id: 1234,
-      user: {
-        name: "Phuc",
-      },
-      totalPrice: 100,
-      status: "Processing",
-    },
-  ];
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { orders, loading, error } = useSelector((state) => state.adminOrders);
+  const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (!user || user.role !== "admin") {
+      navigate("/");
+    } else {
+      dispatch(fetchAllOrders());
+    }
+  }, [user, dispatch, navigate]);
 
   const handleStatusChange = (orderId, status) => {
-    console.log({ id: orderId, status });
+    dispatch(updateOrderStatus({ id: orderId, status: status }));
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -40,8 +51,12 @@ const OrderManagement = () => {
                   <td className="py-4 px-4 font-medium text-gray-900 whitespace-nowrap">
                     #{order._id}
                   </td>
-                  <td className="p-4">{order.user.name}</td>
-                  <td className="p-4">{order.totalPrice}</td>
+                  <td className="p-4">
+                    {order.user ? order.user.name : "người dùng đã bị xóa"}
+                  </td>
+                  <td className="p-4">
+                    {order.totalPrice.toLocaleString("vi-VN")} VNĐ
+                  </td>
                   <td className="p-4">
                     <select
                       value={order.status}

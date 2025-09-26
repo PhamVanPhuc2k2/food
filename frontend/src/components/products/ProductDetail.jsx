@@ -1,79 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import ProductGrid from "./ProductGrid";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchProductDetails,
+  fetchSimilarProducts,
+} from "../../redux/slices/productSlice";
+import { addToCart } from "../../redux/slices/cartSlice";
 
-const selectedProduct = {
-  name: "Rau bí",
-  price: 120,
-  originPrice: 150,
-  description: "Rau nhà trồng",
-  unit: "Mớ",
-  image: [
-    {
-      url: "https://picsum.photos/200?random=1",
-      altText: "Rau bí",
-    },
-    {
-      url: "https://picsum.photos/200?random=2",
-      altText: "Rau bí",
-    },
-  ],
-};
-
-const similarProducts = [
-  {
-    _id: 1,
-    name: "Product 1",
-    price: 100,
-    image: [
-      {
-        url: "https://picsum.photos/200?random=5",
-        altText: "Rau bí",
-      },
-    ],
-  },
-  {
-    _id: 2,
-    name: "Product 2",
-    price: 100,
-    image: [
-      {
-        url: "https://picsum.photos/200?random=6",
-        altText: "Rau bí",
-      },
-    ],
-  },
-  {
-    _id: 3,
-    name: "Product 3",
-    price: 100,
-    image: [
-      {
-        url: "https://picsum.photos/200?random=7",
-        altText: "Rau bí",
-      },
-    ],
-  },
-  {
-    _id: 4,
-    name: "Product 4",
-    price: 100,
-    image: [
-      {
-        url: "https://picsum.photos/200?random=8",
-        altText: "Rau bí",
-      },
-    ],
-  },
-];
-
-const ProductDetail = () => {
-  // Gán giá trị mặc định cho mainImage để tránh src=""
-  const [mainImage, setMainImage] = useState(
-    selectedProduct.image[0]?.url || ""
+const ProductDetail = ({ productId }) => {
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const { selectedProduct, loading, error, similarProducts } = useSelector(
+    (state) => state.products
   );
+  const { user, guestId } = useSelector((state) => state.auth);
+
+  const [mainImage, setMainImage] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isButtonDisable, setIsButtonDisable] = useState(false);
+
+  const productFetchId = productId || id;
 
   const handleChangeQuantity = (action) => {
     if (action === "increase") setQuantity((prev) => prev + 1);
@@ -82,30 +30,50 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     setIsButtonDisable(true);
-    setTimeout(() => {
-      toast.success("Thêm vào giỏ hàng thành công!", {
-        duration: 1000,
+    dispatch(
+      addToCart({
+        productId: productFetchId,
+        quantity,
+        guestId,
+        userId: user?._id,
+      })
+    )
+      .then(() => {
+        toast.success("Product added to cart!", { duration: 1000 });
+      })
+      .finally(() => {
+        setIsButtonDisable(false);
       });
-      setIsButtonDisable(false);
-    }, 500);
   };
 
   useEffect(() => {
-    if (selectedProduct?.image?.length > 0) {
-      setMainImage(selectedProduct.image[0].url);
+    if (productFetchId) {
+      dispatch(fetchProductDetails(productFetchId));
+      dispatch(fetchSimilarProducts({ id: productFetchId }));
     }
-  }, []);
+  }, [dispatch, productFetchId]);
+
+  useEffect(() => {
+    if (selectedProduct?.images?.length > 0) {
+      setMainImage(selectedProduct.images[0].url);
+    }
+  }, [selectedProduct]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!selectedProduct) return <p>Không tìm thấy sản phẩm</p>;
 
   return (
     <div className="p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-lg p-8">
         <div className="flex flex-col md:flex-row">
+          {/* Thumbnail list */}
           <div className="hidden md:flex flex-col space-y-4 mr-6">
-            {selectedProduct.image.map((image, index) => (
+            {selectedProduct.images?.map((image, index) => (
               <img
                 key={index}
                 src={image.url}
-                alt={image.altText}
+                alt={image.altText || "product image"}
                 className={`h-20 w-20 object-cover rounded-lg cursor-pointer border ${
                   mainImage === image.url ? "border-black" : "border-white"
                 }`}
@@ -113,22 +81,31 @@ const ProductDetail = () => {
               />
             ))}
           </div>
+
+          {/* Main image */}
           <div className="md:w-1/2">
             <div className="mb-4">
-              <img
-                src={mainImage}
-                alt="Main product"
-                className="w-full h-auto object-cover rounded-lg"
-              />
+              {mainImage ? (
+                <img
+                  src={mainImage}
+                  alt={selectedProduct.name}
+                  className="w-full h-auto object-cover rounded-lg"
+                />
+              ) : (
+                <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                  No Image
+                </div>
+              )}
             </div>
           </div>
-          {/* mobile */}
+
+          {/* Mobile thumbnails */}
           <div className="md:hidden flex overflow-x-scroll space-x-4 mb-4">
-            {selectedProduct.image.map((image, index) => (
+            {selectedProduct.images?.map((image, index) => (
               <img
                 key={index}
                 src={image.url}
-                alt={image.altText}
+                alt={image.altText || "product image"}
                 className={`h-20 w-20 object-cover rounded-lg cursor-pointer border ${
                   mainImage === image.url ? "border-black" : "border-white"
                 }`}
@@ -136,6 +113,7 @@ const ProductDetail = () => {
               />
             ))}
           </div>
+
           {/* Right Side */}
           <div className="md:w-1/2 md:ml-10">
             <h1 className="text-2xl md:text-3xl font-semibold mb-2">
@@ -146,13 +124,16 @@ const ProductDetail = () => {
                 `${selectedProduct.originPrice} VNĐ`}
             </p>
             <p className="text-xl text-gray-500 mb-2">
-              {selectedProduct.price} VNĐ
+              {selectedProduct.price.toLocaleString("vi-VN")} VNĐ
             </p>
             <p className="text-gray-600 mb-4">{selectedProduct.description}</p>
+
             <div className="mb-4 flex items-center space-x-2">
               <p className="text-gray-700">Đơn vị tính:</p>
               <p className="font-semibold">{selectedProduct.unit}</p>
             </div>
+
+            {/* Quantity control */}
             <div className="mb-6 flex items-center space-x-2">
               <p className="text-gray-700">Số lượng:</p>
               <div className="flex items-center space-x-2 mt-2">
@@ -171,6 +152,8 @@ const ProductDetail = () => {
                 </button>
               </div>
             </div>
+
+            {/* Add to cart button */}
             <button
               disabled={isButtonDisable}
               onClick={handleAddToCart}
@@ -184,11 +167,17 @@ const ProductDetail = () => {
             </button>
           </div>
         </div>
+
+        {/* Similar products */}
         <div className="mt-20">
           <h2 className="text-2xl text-center font-medium mb-4">
             Bạn có thể thích
           </h2>
-          <ProductGrid products={similarProducts} />
+          <ProductGrid
+            products={Array.isArray(similarProducts) ? similarProducts : []}
+            loading={loading}
+            error={error}
+          />
         </div>
       </div>
     </div>

@@ -6,11 +6,28 @@ import {
   FaStore,
   FaUser,
 } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { logout } from "../../redux/slices/authSlice";
+import { clearCart } from "../../redux/slices/cartSlice";
+import axios from "axios";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
-  const handleLogout = () => {
+  const dispatch = useDispatch();
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/logout`,
+        {},
+        { withCredentials: true } // rất quan trọng để gửi cookie lên
+      );
+    } catch (err) {
+      console.error("Lỗi khi gọi API logout:", err);
+    }
+
+    dispatch(logout());
+    dispatch(clearCart());
     navigate("/");
   };
   return (

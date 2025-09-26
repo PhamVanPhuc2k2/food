@@ -5,10 +5,17 @@ import { IoMdClose } from "react-icons/io";
 
 import Search from "./Search";
 import CartDrawer from "../layout/CartDrawer";
+import { useSelector } from "react-redux";
 
 const NavBar = () => {
   const [showCartDrawer, setShowCartDrawer] = useState(false);
   const [navDrawer, setNavDrawer] = useState(false);
+  const { cart } = useSelector((state) => state.cart);
+  const { user } = useSelector((state) => state.auth);
+
+  const cartItemCount =
+    cart?.products?.reduce((total, product) => total + product.quantity, 0) ||
+    0;
 
   const handleShowCartDrawer = () => {
     setShowCartDrawer(!showCartDrawer);
@@ -26,37 +33,40 @@ const NavBar = () => {
         </div>
         <div className="hidden md:flex space-x-6">
           <Link
-            to="/product/rau-cu-qua"
+            to="/products/rau-cu-qua"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Rau củ quả
           </Link>
           <Link
-            to="#"
+            to="/products/do-tuoi-song"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Đồ tươi sống
           </Link>
           <Link
-            to="#"
+            to="/products/gia-vi"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Gia vị
           </Link>
           <Link
-            to="#"
+            to="/products/do-kho"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Đồ khô
           </Link>
         </div>
         <div className="flex items-center space-x-4">
-          <Link
-            to="/admin"
-            className="block bg-black p-2 rounded text-white text-sm"
-          >
-            Admin
-          </Link>
+          {user && user.role === "admin" && (
+            <Link
+              to="/admin"
+              className="block bg-black p-2 rounded text-white text-sm"
+            >
+              Admin
+            </Link>
+          )}
+
           <Link to="/profile" className="hover:text-black">
             <CiUser className="h-6 w-6 text-gray-700" />
           </Link>
@@ -65,9 +75,11 @@ const NavBar = () => {
             className="relative hover:text-black"
           >
             <CiShoppingCart className="h-6 w-6 text-gray-700" />
-            <span className="absolute -top-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-              1
-            </span>
+            {cartItemCount > 0 && (
+              <span className="absolute -top-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                {cartItemCount}
+              </span>
+            )}
           </button>
           <Search />
           <button
@@ -98,28 +110,28 @@ const NavBar = () => {
           <nav className="flex flex-col space-y-4">
             <Link
               onClick={handleShowNavDrawer}
-              to="#"
+              to="/products/rau-cu-qua"
               className="text-gray-700 hover:text-black text-sm font-medium uppercase"
             >
               Rau củ quả
             </Link>
             <Link
               onClick={handleShowNavDrawer}
-              to="#"
+              to="/products/do-tuoi-song"
               className="text-gray-700 hover:text-black text-sm font-medium uppercase"
             >
               Đồ tươi sống
             </Link>
             <Link
               onClick={handleShowNavDrawer}
-              to="#"
+              to="/products/gia-vi"
               className="text-gray-700 hover:text-black text-sm font-medium uppercase"
             >
               Gia vị
             </Link>
             <Link
               onClick={handleShowNavDrawer}
-              to="#"
+              to="products/do-kho"
               className="text-gray-700 hover:text-black text-sm font-medium uppercase"
             >
               Đồ khô

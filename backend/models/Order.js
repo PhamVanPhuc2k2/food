@@ -13,8 +13,8 @@ const orderItemSchema = new mongoose.Schema(
       required: true,
     },
     image: {
-      type: String,
-      required: true,
+      url: String,
+      altText: String,
     },
     price: {
       type: Number,
@@ -40,15 +40,12 @@ const orderSchema = new mongoose.Schema(
     shippingAddress: {
       address: {
         type: String,
-        required: true,
       },
       city: {
         type: String,
-        required: true,
       },
       country: {
         type: String,
-        required: true,
       },
     },
     paymentMethod: {

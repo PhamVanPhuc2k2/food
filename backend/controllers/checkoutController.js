@@ -1,4 +1,3 @@
-const { response } = require("express");
 const checkoutService = require("../services/checkoutService");
 
 const checkoutController = {
@@ -28,7 +27,7 @@ const checkoutController = {
       next(err);
     }
   },
-  completeCheckoutController: async (res, req, next) => {
+  completeCheckoutController: async (req, res, next) => {
     const checkoutId = req.params.id;
     try {
       const response = await checkoutService.completeCheckoutService(
